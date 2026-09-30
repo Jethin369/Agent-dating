@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent dates</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #eef0f6; --panel: #fff; --ink: #1c2040; --mute: #666b8c; --line: #dcdff0;
+  --brand: #3d43d6; --brand-soft: #e6e7fb; --rose: #e8517f; --rose-soft: #fde6ed; --ok: #1f8f6a; --bad: #b3372f;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+h1, h2, h3 { font-family: "Bricolage Grotesque", system-ui, sans-serif; margin: 0; line-height: 1.15; }
+header { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; padding: 16px 24px; background: var(--panel); border-bottom: 1px solid var(--line); }
+header h1 { font-size: 22px; color: var(--brand); }
+nav { display: flex; gap: 4px; flex-wrap: wrap; }
+nav button { border: 0; background: none; padding: 8px 14px; border-radius: 8px; font: inherit; color: var(--mute); cursor: pointer; }
+nav button.on { background: var(--brand-soft); color: var(--brand); font-weight: 600; }
+nav button:hover { color: var(--ink); }
+main { max-width: 1040px; margin: 0 auto; padding: 28px 20px 80px; }
+section { display: none; }
+section.on { display: block; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 22px; }
+.lede { color: var(--mute); max-width: 60ch; margin: 8px 0 22px; }
+label { display: block; font-weight: 600; margin: 14px 0 6px; }
+input, select { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; font: inherit; background: #fff; color: var(--ink); }
+input:focus, select:focus, button:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+.go { margin-top: 18px; background: var(--brand); color: #fff; border: 0; padding: 11px 20px; border-radius: 8px; font: inherit; font-weight: 600; cursor: pointer; }
+.go:disabled { opacity: .5; cursor: wait; }
+.ghost { background: var(--panel); color: var(--brand); border: 1px solid var(--brand); padding: 8px 14px; border-radius: 8px; font: inherit; cursor: pointer; }
+.err { color: var(--bad); margin-top: 12px; }
+.steps { list-style: none; padding: 0; margin: 20px 0 0; }
+.steps li { display: flex; align-items: center; gap: 10px; padding: 7px 0; color: var(--mute); }
+.steps li.active { color: var(--ink); font-weight: 600; }
+.steps li.done { color: var(--ok); }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--line); flex: none; }
+.active .dot { background: var(--brand); animation: pulse 1s infinite alternate; }
+.done .dot { background: var(--ok); }
+@keyframes pulse { to { transform: scale(1.5); opacity: .5; } }
+@media (prefers-reduced-motion: reduce) { .active .dot { animation: none; } }
+.split { display: grid; grid-template-columns: 290px 1fr; gap: 20px; align-items: start; }
+@media (max-width: 760px) { .split { grid-template-columns: 1fr; } }
+.list { max-height: 640px; overflow: auto; padding: 6px; }
+.list button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 10px 12px; border-radius: 8px; font: inherit; color: var(--ink); cursor: pointer; }
+.list button small { display: block; color: var(--mute); }
+.list button.on { background: var(--brand-soft); }
+.list button:hover { background: var(--bg); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 14px; }
+.chip { background: var(--brand-soft); color: var(--brand); padding: 3px 10px; border-radius: 99px; font-size: 13px; }
+.chip.rose { background: var(--rose-soft); color: var(--rose); }
+.profile h2 { font-size: 28px; }
+.profile h3 { font-size: 15px; margin-top: 18px; color: var(--mute); font-family: inherit; font-weight: 600; }
+.profile a { color: var(--brand); }
+.evidence { padding-left: 18px; margin: 6px 0; }
+.evidence li { margin-bottom: 6px; }
+.tag { font-size: 12px; color: var(--mute); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; margin-left: 4px; }
+.bubbles { display: flex; flex-direction: column; gap: 10px; margin: 18px 0; }
+.bubble { max-width: 78%; padding: 10px 14px; border-radius: 14px; }
+.bubble b { display: block; font-size: 12px; margin-bottom: 2px; }
+.bubble.l { background: var(--brand-soft); border-bottom-left-radius: 4px; align-self: flex-start; }
+.bubble.r { background: var(--rose-soft); border-bottom-right-radius: 4px; align-self: flex-end; }
+.verdicts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 760px) { .verdicts { grid-template-columns: 1fr; } }
+.verdict { border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+.verdict .n { font-family: "Bricolage Grotesque", sans-serif; font-size: 34px; font-weight: 700; }
+.rank { display: grid; grid-template-columns: 44px 1fr auto; gap: 14px; padding: 16px 0; border-top: 1px solid var(--line); }
+.rank:first-child { border-top: 0; }
+.rank .pos { font-family: "Bricolage Grotesque", sans-serif; font-size: 26px; font-weight: 700; color: var(--brand); }
+.rank .sc { text-align: right; font-family: "Bricolage Grotesque", sans-serif; font-size: 30px; font-weight: 700; color: var(--rose); }
+.rank .sc small { display: block; font: 12px system-ui; color: var(--mute); }
+.rank p { margin: 4px 0; color: var(--mute); }
+.empty { color: var(--mute); padding: 20px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Agent dates</h1>
+  <nav id="nav">
+    <button data-t="try">Try it</button>
+    <button data-t="profiles">Profiles</button>
+    <button data-t="dates">Dates</button>
+    <button data-t="rankings">Rankings</button>
+  </nav>
+</header>
+<main>
+
+<section id="try">
+  <div class="panel">
+    <h2>Send your agent on dates</h2>
+    <p class="lede">Paste one public LinkedIn and the public Instagram that belongs to the same person. An agent reads both, builds a profile, then goes on dates with the people already in the pool.</p>
+    <label for="li">LinkedIn profile</label>
+    <input id="li" placeholder="https://www.linkedin.com/in/username">
+    <label for="ig">Instagram profile (must be public)</label>
+    <input id="ig" placeholder="https://www.instagram.com/username">
+    <button class="go" id="start">Start the dates</button>
+    <div class="err" id="err"></div>
+    <ul class="steps" id="steps"></ul>
+    <div id="after" style="display:none;margin-top:16px">
+      <button class="ghost" id="seeProfile">Read the profile</button>
+      <button class="ghost" id="seeRank">See my rankings</button>
+    </div>
+  </div>
+</section>
+
+<section id="profiles">
+  <div class="split">
+    <div class="panel list" id="peopleList"></div>
+    <div class="panel profile" id="profileView"><p class="empty">Pick someone to read their profile.</p></div>
+  </div>
+</section>
+
+<section id="dates">
+  <div class="split">
+    <div class="panel list" id="dateList"></div>
+    <div class="panel" id="dateView"><p class="empty">Pick a date to read the conversation.</p></div>
+  </div>
+</section>
+
+<section id="rankings">
+  <div class="panel">
+    <label for="rankPerson" style="margin-top:0">Rankings for</label>
+    <select id="rankPerson"></select>
+    <div id="rankView"></div>
+  </div>
+</section>
+
+</main>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function api(path, opts) {
+  const r = await fetch(path, opts);
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.detail || r.statusText);
+  return data;
+}
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+};
+
+let people = [];
+let lastPerson = null;
+
+function show(tab) {
+  document.querySelectorAll('section').forEach(s => s.classList.toggle('on', s.id === tab));
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.t === tab));
+  store.set('tab', tab);
+  if (tab === 'profiles') loadPeople();
+  if (tab === 'dates') loadDates();
+  if (tab === 'rankings') loadRankPeople();
+}
+$('#nav').addEventListener('click', e => { if (e.target.dataset.t) show(e.target.dataset.t); });
+
+async function loadPeople() {
+  people = await api('/api/people');
+  const box = $('#peopleList');
+  if (!people.length) { box.innerHTML = '<p class="empty">No one is in the pool yet. Add yourself on the Try it tab.</p>'; return; }
+  box.innerHTML = people.map(p => `<button data-id="${p.id}">${esc(p.name)}<small>${esc(p.headline)}</small></button>`).join('');
+  box.querySelectorAll('button').forEach(b => b.onclick = () => openProfile(+b.dataset.id));
+}
+
+function chips(list, cls = '') {
+  return list && list.length ? `<div class="chips">${list.map(x => `<span class="chip ${cls}">${esc(x)}</span>`).join('')}</div>` : '<p class="empty" style="padding:0">Nothing found.</p>';
+}
+
+async function openProfile(id) {
+  lastPerson = id;
+  store.set('person', id);
+  document.querySelectorAll('#peopleList button').forEach(b => b.classList.toggle('on', +b.dataset.id === id));
+  const p = await api('/api/people/' + id);
+  $('#profileView').innerHTML = `
+    <h2>${esc(p.name)}</h2>
+    <p style="color:var(--mute);margin:4px 0 0">${esc(p.headline)}${p.location ? ' · ' + esc(p.location) : ''}</p>
+    <p>${esc(p.summary)}</p>
+    <p><a href="${esc(p.linkedin_url)}" target="_blank" rel="noopener">LinkedIn</a> &nbsp; <a href="${esc(p.instagram_url)}" target="_blank" rel="noopener">Instagram</a></p>
+    <h3>Needs</h3>${chips(p.needs, 'rose')}
+    <h3>Hobbies</h3>${chips(p.hobbies)}
+    <h3>Interests</h3>${chips(p.interests)}
+    <h3>Values</h3>${chips(p.values)}
+    <h3>Personality</h3>${chips(p.personality)}
+    <h3>How they communicate</h3><p>${esc(p.communication_style)}</p>
+    <h3>Lifestyle</h3><p>${esc(p.lifestyle)}</p>
+    <h3>Likely looking for</h3><p>${esc(p.looking_for)}</p>
+    <h3>Where this came from</h3>
+    <ul class="evidence">${(p.evidence || []).map(e => `<li>${esc(e.claim)}<span class="tag">${esc(e.source)}</span><br><small style="color:var(--mute)">${esc(e.detail)}</small></li>`).join('')}</ul>
+    <p><button class="ghost" onclick="goRank(${id})">See who fits ${esc(p.name.split(' ')[0])} best</button></p>`;
+}
+
+async function loadDates() {
+  const list = await api('/api/dates');
+  const box = $('#dateList');
+  if (!list.length) { box.innerHTML = '<p class="empty">No dates yet.</p>'; return; }
+  box.innerHTML = list.map(d => `<button data-id="${d.id}">${esc(d.a)} and ${esc(d.b)}<small>${d.score_a} / ${d.score_b}</small></button>`).join('');
+  box.querySelectorAll('button').forEach(b => b.onclick = () => openDate(+b.dataset.id));
+}
+
+function verdictCard(name, v) {
+  return `<div class="verdict"><div>${esc(name)}'s agent</div><div class="n">${v.score}</div>
+    <p>${esc(v.summary)}</p>
+    <p><b>${v.would_meet_again ? 'Would meet again' : 'Would not meet again'}</b></p>
+    ${v.liked.length ? '<div>Liked</div>' + chips(v.liked) : ''}
+    ${v.concerns.length ? '<div>Concerns</div>' + chips(v.concerns, 'rose') : ''}</div>`;
+}
+
+async function openDate(id) {
+  document.querySelectorAll('#dateList button').forEach(b => b.classList.toggle('on', +b.dataset.id === id));
+  const d = await api('/api/dates/' + id);
+  const bubbles = d.transcript.map((t, i) => `<div class="bubble ${i % 2 === 0 ? 'l' : 'r'}"><b>${esc(t.speaker)}</b>${esc(t.text)}</div>`).join('');
+  $('#dateView').innerHTML = `<h2>${esc(d.a.name)} and ${esc(d.b.name)}</h2>
+    <div class="bubbles">${bubbles}</div>
+    <div class="verdicts">${verdictCard(d.a.name, d.verdict_a)}${verdictCard(d.b.name, d.verdict_b)}</div>`;
+}
+
+async function loadRankPeople() {
+  people = await api('/api/people');
+  const sel = $('#rankPerson');
+  sel.innerHTML = people.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
+  const want = lastPerson || +store.get('person');
+  if (want && people.some(p => p.id === want)) sel.value = want;
+  if (people.length) openRankings(+sel.value);
+  else $('#rankView').innerHTML = '<p class="empty">No one is in the pool yet.</p>';
+}
+$('#rankPerson').onchange = e => openRankings(+e.target.value);
+
+async function openRankings(id) {
+  lastPerson = id;
+  store.set('person', id);
+  const rows = await api('/api/rankings/' + id);
+  $('#rankView').innerHTML = rows.length ? rows.map(r => `
+    <div class="rank">
+      <div class="pos">${r.rank}</div>
+      <div>
+        <strong>${esc(r.name)}</strong> <span style="color:var(--mute)">${esc(r.headline)}</span>
+        <p>${esc(r.reason)}</p>
+        ${r.liked && r.liked.length ? chips(r.liked) : ''}
+        ${r.concerns && r.concerns.length ? chips(r.concerns, 'rose') : ''}
+        ${r.date_id ? `<button class="ghost" onclick="goDate(${r.date_id})">Read their date</button>` : '<small style="color:var(--mute)">No date, ranked on the quick score only</small>'}
+      </div>
+      <div class="sc">${r.score}<small>${r.date_id ? `they scored ${r.their_score}` : 'quick score'}</small></div>
+    </div>`).join('') : '<p class="empty">No matches scored yet.</p>';
+}
+
+async function goDate(id) { show('dates'); await loadDates(); openDate(id); }
+async function goRank(id) { lastPerson = id; show('rankings'); }
+
+// live run
+let timer = null;
+function drawSteps(job) {
+  $('#steps').innerHTML = job.steps.map(s => `<li class="${s.state}"><span class="dot"></span>${esc(s.label)}</li>`).join('');
+}
+$('#start').onclick = async () => {
+  $('#err').textContent = '';
+  $('#after').style.display = 'none';
+  $('#steps').innerHTML = '';
+  $('#start').disabled = true;
+  try {
+    const r = await api('/api/people', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ linkedin_url: $('#li').value, instagram_url: $('#ig').value })
+    });
+    lastPerson = r.person_id;
+    if (!r.job_id) { finish(); return; }
+    timer = setInterval(async () => {
+      try {
+        const job = await api('/api/jobs/' + r.job_id);
+        drawSteps(job);
+        if (job.state === 'done') { clearInterval(timer); finish(); }
+        if (job.state === 'error') { clearInterval(timer); $('#err').textContent = job.error; $('#start').disabled = false; }
+      } catch (e) { clearInterval(timer); $('#err').textContent = e.message; $('#start').disabled = false; }
+    }, 2000);
+  } catch (e) {
+    $('#err').textContent = e.message;
+    $('#start').disabled = false;
+  }
+};
+function finish() {
+  $('#start').disabled = false;
+  $('#after').style.display = 'block';
+}
+$('#seeProfile').onclick = async () => { show('profiles'); await loadPeople(); openProfile(lastPerson); };
+$('#seeRank').onclick = () => show('rankings');
+
+const startTab = location.pathname === '/demo' ? 'rankings' : (store.get('tab') || 'try');
+show(startTab);
+</script>
+</body>
+</html>
